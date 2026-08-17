@@ -275,21 +275,21 @@
     // something new to unlock (old version had big dead gaps near the top).
     const crops = {
       1:  { name: 'Palay',            icon: '🌾', cost: 10,     reward: 18,     time: 20,    xpGain: 10,    unlockLvl: 1 },
-      2:  { name: 'Munggo',           icon: '🫘', cost: 22,     reward: 40,     time: 45,    xpGain: 20,    unlockLvl: 5 },
-      3:  { name: 'Kamatis',          icon: '🍅', cost: 45,     reward: 85,     time: 100,   xpGain: 40,    unlockLvl: 10 },
-      4:  { name: 'Talong',           icon: '🍆', cost: 80,     reward: 155,    time: 180,   xpGain: 70,    unlockLvl: 16 },
-      5:  { name: 'Mais',             icon: '🌽', cost: 150,    reward: 300,    time: 320,   xpGain: 130,   unlockLvl: 23 },
-      6:  { name: 'Kamote',           icon: '🍠', cost: 280,    reward: 560,    time: 520,   xpGain: 240,   unlockLvl: 30 },
-      7:  { name: 'Sibuyas',          icon: '🧅', cost: 520,    reward: 1050,   time: 820,   xpGain: 450,   unlockLvl: 38 },
-      8:  { name: 'Saging',           icon: '🍌', cost: 950,    reward: 1950,   time: 1250,  xpGain: 820,   unlockLvl: 46 },
-      9:  { name: 'Papaya',           icon: '🍈', cost: 1750,   reward: 3600,   time: 1850,  xpGain: 1500,  unlockLvl: 56 },
-      10: { name: 'Pinya',            icon: '🍍', cost: 3200,   reward: 6600,   time: 2650,  xpGain: 2700,  unlockLvl: 64 },
-      11: { name: 'Kalabasa',         icon: '🎃', cost: 5800,   reward: 12000,  time: 3700,  xpGain: 4800,  unlockLvl: 72 },
-      12: { name: 'Mangga',           icon: '🥭', cost: 10500,  reward: 22000,  time: 5000,  xpGain: 8600,  unlockLvl: 80 },
-      13: { name: 'Niyog',            icon: '🥥', cost: 19000,  reward: 40000,  time: 6600,  xpGain: 15500, unlockLvl: 86 },
-      14: { name: 'Sili',             icon: '🌶️', cost: 34000,  reward: 72000,  time: 8500,  xpGain: 28000, unlockLvl: 92 },
-      15: { name: 'Repolyo',          icon: '🥬', cost: 62000,  reward: 130000, time: 10500, xpGain: 50000, unlockLvl: 96 },
-      16: { name: 'Ginintuang Palay', icon: '✨', cost: 110000, reward: 235000, time: 13000, xpGain: 90000, unlockLvl: 100 }
+      2:  { name: 'Munggo',           icon: '🫘', cost: 22,     reward: 40,     time: 90,    xpGain: 20,    unlockLvl: 5 },
+      3:  { name: 'Kamatis',          icon: '🍅', cost: 45,     reward: 85,     time: 220,   xpGain: 40,    unlockLvl: 10 },
+      4:  { name: 'Talong',           icon: '🍆', cost: 80,     reward: 155,    time: 420,   xpGain: 70,    unlockLvl: 16 },
+      5:  { name: 'Mais',             icon: '🌽', cost: 150,    reward: 300,    time: 780,   xpGain: 130,   unlockLvl: 23 },
+      6:  { name: 'Kamote',           icon: '🍠', cost: 280,    reward: 560,    time: 1300,  xpGain: 240,   unlockLvl: 30 },
+      7:  { name: 'Sibuyas',          icon: '🧅', cost: 520,    reward: 1050,   time: 2100,  xpGain: 450,   unlockLvl: 38 },
+      8:  { name: 'Saging',           icon: '🍌', cost: 950,    reward: 1950,   time: 3200,  xpGain: 820,   unlockLvl: 46 },
+      9:  { name: 'Papaya',           icon: '🍈', cost: 1750,   reward: 3600,   time: 4800,  xpGain: 1500,  unlockLvl: 56 },
+      10: { name: 'Pinya',            icon: '🍍', cost: 3200,   reward: 6600,   time: 6900,  xpGain: 2700,  unlockLvl: 64 },
+      11: { name: 'Kalabasa',         icon: '🎃', cost: 5800,   reward: 12000,  time: 9600,  xpGain: 4800,  unlockLvl: 72 },
+      12: { name: 'Mangga',           icon: '🥭', cost: 10500,  reward: 22000,  time: 13000, xpGain: 8600,  unlockLvl: 80 },
+      13: { name: 'Niyog',            icon: '🥥', cost: 19000,  reward: 40000,  time: 17500, xpGain: 15500, unlockLvl: 86 },
+      14: { name: 'Sili',             icon: '🌶️', cost: 34000,  reward: 72000,  time: 23000, xpGain: 28000, unlockLvl: 92 },
+      15: { name: 'Repolyo',          icon: '🥬', cost: 62000,  reward: 130000, time: 29000, xpGain: 50000, unlockLvl: 96 },
+      16: { name: 'Ginintuang Palay', icon: '✨', cost: 110000, reward: 235000, time: 36000, xpGain: 90000, unlockLvl: 100 }
     };
 
     function unlockedCrops() {
@@ -583,7 +583,7 @@
                 <div class="shop-icon">${c.icon}</div>
                 <div>
                   <div class="shop-name">${c.name} ${unlocked ? '' : '🔒'}</div>
-                  <div class="shop-sub">Lvl ${c.unlockLvl} · ${c.cost}🪙 seed → ${c.reward}🪙 harvest · ${Math.round(c.time/60)}m grow</div>
+                  <div class="shop-sub">Lvl ${c.unlockLvl} · ${c.cost}🪙 seed → ${c.reward}🪙 harvest · ${c.time >= 3600 ? (c.time/3600).toFixed(1) + 'h' : Math.round(c.time/60) + 'm'} grow</div>
                 </div>
               </div>
             </div>`;
