@@ -252,7 +252,9 @@
     let questProgress = {};            // questId -> count
     let questClaimed = {};             // questId -> bool
 
-    function xpNeededFor(lvl) { return Math.floor(150 * Math.pow(lvl, 1.55)); }
+    // Steeper curve than before: early levels still feel quick, but the climb
+    // past level 50 gets noticeably harder, so reaching 100 is a real flex.
+    function xpNeededFor(lvl) { return Math.floor(180 * Math.pow(lvl, 1.75)); }
 
     const ranks = [
       { min: 1,  title: 'Baguhang Magsasaka' },   // Novice Farmer
@@ -285,8 +287,8 @@
       11: { name: 'Kalabasa',         icon: '🎃', cost: 5800,   reward: 12000,  time: 3700,  xpGain: 4800,  unlockLvl: 72 },
       12: { name: 'Mangga',           icon: '🥭', cost: 10500,  reward: 22000,  time: 5000,  xpGain: 8600,  unlockLvl: 80 },
       13: { name: 'Niyog',            icon: '🥥', cost: 19000,  reward: 40000,  time: 6600,  xpGain: 15500, unlockLvl: 86 },
-      14: { name: 'Kape',             icon: '☕', cost: 34000,  reward: 72000,  time: 8500,  xpGain: 28000, unlockLvl: 92 },
-      15: { name: 'Cacao',            icon: '🍫', cost: 62000,  reward: 130000, time: 10500, xpGain: 50000, unlockLvl: 96 },
+      14: { name: 'Sili',             icon: '🌶️', cost: 34000,  reward: 72000,  time: 8500,  xpGain: 28000, unlockLvl: 92 },
+      15: { name: 'Repolyo',          icon: '🥬', cost: 62000,  reward: 130000, time: 10500, xpGain: 50000, unlockLvl: 96 },
       16: { name: 'Ginintuang Palay', icon: '✨', cost: 110000, reward: 235000, time: 13000, xpGain: 90000, unlockLvl: 100 }
     };
 
@@ -594,6 +596,14 @@
           </div>
           <div style="font-size:11px; font-weight:800; text-align:left; margin-bottom:6px; color:var(--accent-gold);">ALL 16 CROP TIERS</div>
           ${rows}
+          <div style="font-size:11px; font-weight:800; text-align:left; margin:14px 0 6px 0; color:var(--accent-gold);">RANK TITLES (LEVEL 1-100)</div>
+          ${ranks.map(r => `
+            <div class="shop-row">
+              <div class="shop-row-left">
+                <div class="shop-icon">${level >= r.min ? '🏅' : '🔒'}</div>
+                <div><div class="shop-name">${r.title}</div><div class="shop-sub">Lvl ${r.min}${r.min === level ? ' · Current' : ''}</div></div>
+              </div>
+            </div>`).join('')}
         `;
       }
     }
