@@ -3,114 +3,174 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Telegram Farm Game</title>
+  <title>PH Farm - Telegram Mini App</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #134e5e, #71b280);
+      --card-bg: rgba(255, 255, 255, 0.1);
+      --card-border: rgba(255, 255, 255, 0.2);
+      --accent-green: #2ecc71;
+      --accent-gold: #f1c40f;
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       text-align: center;
-      background: #18191a;
-      color: #e4e6eb;
+      background: var(--bg-gradient);
+      color: #ffffff;
       margin: 0;
-      padding: 20px;
+      padding: 15px;
+      min-height: 100vh;
     }
     .header {
-      background: #242526;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--card-border);
       padding: 15px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      border-radius: 16px;
+      margin-bottom: 15px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
     }
-    .stats {
-      font-size: 18px;
+    .stats-row {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+      font-size: 15px;
       font-weight: bold;
-      color: #45bd62;
+    }
+    .stat-badge {
+      background: rgba(0, 0, 0, 0.25);
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .unlocked-banner {
+      background: rgba(241, 196, 15, 0.2);
+      border: 1px solid var(--accent-gold);
+      color: #f39c12;
+      padding: 8px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 15px;
+      font-weight: bold;
     }
     .grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      max-width: 350px;
+      gap: 12px;
+      max-width: 360px;
       margin: 0 auto;
     }
     .plot {
-      background: #3a3b3c;
-      border: 2px dashed #4e4f50;
-      border-radius: 12px;
-      height: 120px;
+      background: rgba(44, 62, 80, 0.6);
+      backdrop-filter: blur(5px);
+      border: 2px dashed rgba(255, 255, 255, 0.3);
+      border-radius: 16px;
+      height: 130px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
     .plot:active {
-      transform: scale(0.95);
+      transform: scale(0.94);
     }
     .plot.growing {
-      border: 2px solid #f0ad4e;
-      background: #2c2d2e;
+      border: 2px solid #e67e22;
+      background: rgba(230, 126, 34, 0.15);
     }
     .plot.ready {
-      border: 2px solid #45bd62;
-      background: #1b3a2b;
-      animation: pulse 1.5s infinite;
+      border: 2px solid var(--accent-green);
+      background: rgba(46, 204, 113, 0.2);
+      animation: pulse 1.2s infinite alternate;
     }
     @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.7; }
-      100% { opacity: 1; }
+      0% { transform: scale(1); box-shadow: 0 0 10px rgba(46, 204, 113, 0.4); }
+      100% { transform: scale(1.02); box-shadow: 0 0 20px rgba(46, 204, 113, 0.8); }
     }
     .plot-icon {
-      font-size: 36px;
-      margin-bottom: 5px;
+      font-size: 40px;
+      margin-bottom: 4px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
     }
     .plot-text {
-      font-size: 13px;
-      color: #b0b3b8;
+      font-size: 12px;
+      color: #ecf0f1;
+      font-weight: 500;
     }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <h2 id="welcome-msg">🌱 Telegram Farm</h2>
-    <div class="stats">Coins: <span id="coin-count">100</span> 🪙</div>
+    <h2 id="welcome-msg" style="margin: 0 0 10px 0; font-size: 20px;">🌱 PH Farm</h2>
+    <div class="stats-row">
+      <div class="stat-badge">🪙 <span id="coin-count">120</span></div>
+      <div class="stat-badge">⭐ Level <span id="level-num">1</span></div>
+      <div class="stat-badge">📈 XP: <span id="xp-count">0</span>/<span id="xp-target">100</span></div>
+    </div>
   </div>
 
-  <p style="font-size: 14px; color: #b0b3b8; margin-bottom: 20px;">Tap an empty plot to plant wheat (Cost: 10 🪙)</p>
+  <div id="unlock-info" class="unlocked-banner">
+    🔓 Current Seed: <b>Wheat</b> (Cost: 10🪙 | Reward: 20🪙)
+  </div>
 
   <div class="grid" id="farm-grid">
-    <!-- Plots generated dynamically via JavaScript -->
+    <!-- Plots generated dynamically -->
   </div>
 
   <script>
-    // Initialize Telegram WebApp SDK
     const tg = window.Telegram.WebApp;
     tg.ready();
     tg.expand();
 
-    // Personalize Greeting if opened inside Telegram
     if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
       document.getElementById('welcome-msg').innerText = `🌱 ${tg.initDataUnsafe.user.first_name}'s Farm`;
     }
 
     // Game State
-    let coins = 100;
-    const GROW_TIME_SECONDS = 5; // 5 seconds growth cycle for testing
-    
-    // 4 Farm Plots Data
+    let coins = 120;
+    let level = 1;
+    let xp = 0;
+    let xpTarget = 100;
+
+    // Crop definitions based on level unlocks
+    const crops = {
+      1: { name: 'Wheat', icon: '🌾', cost: 10, reward: 20, time: 5, xpGain: 25 },
+      2: { name: 'Tomato', icon: '🍅', cost: 25, reward: 55, time: 8, xpGain: 50 },
+      3: { name: 'Golden Corn', icon: '🌽', cost: 50, reward: 120, time: 12, xpGain: 100 }
+    };
+
     let plots = [
-      { id: 0, state: 'empty', plantedAt: null, timer: null },
-      { id: 1, state: 'empty', plantedAt: null, timer: null },
-      { id: 2, state: 'empty', plantedAt: null, timer: null },
-      { id: 3, state: 'empty', plantedAt: null, timer: null }
+      { id: 0, state: 'empty', plantedAt: null },
+      { id: 1, state: 'empty', plantedAt: null },
+      { id: 2, state: 'empty', plantedAt: null },
+      { id: 3, state: 'empty', plantedAt: null }
     ];
+
+    function getCurrentCrop() {
+      if (level >= 3) return crops[3];
+      if (level === 2) return crops[2];
+      return crops[1];
+    }
+
+    function renderHeaderInfo() {
+      document.getElementById('coin-count').innerText = coins;
+      document.getElementById('level-num').innerText = level;
+      document.getElementById('xp-count').innerText = xp;
+      document.getElementById('xp-target').innerText = xpTarget;
+
+      const crop = getCurrentCrop();
+      document.getElementById('unlock-info').innerHTML = `🔓 Active Seed: <b>${crop.name} ${crop.icon}</b> (Cost: ${crop.cost}🪙 | Reward: ${crop.reward}🪙)`;
+    }
 
     function renderGrid() {
       const gridContainer = document.getElementById('farm-grid');
       gridContainer.innerHTML = '';
+      const activeCrop = getCurrentCrop();
 
       plots.forEach((plot, index) => {
         const plotDiv = document.createElement('div');
@@ -120,63 +180,68 @@
         if (plot.state === 'empty') {
           plotDiv.innerHTML = `
             <div class="plot-icon">🟫</div>
-            <div class="plot-text">Tap to Plant</div>
+            <div class="plot-text">Plant ${activeCrop.name} (${activeCrop.cost}🪙)</div>
           `;
         } else if (plot.state === 'growing') {
-          const timeLeft = Math.max(0, GROW_TIME_SECONDS - Math.floor((Date.now() - plot.plantedAt) / 1000));
+          const timeLeft = Math.max(0, activeCrop.time - Math.floor((Date.now() - plot.plantedAt) / 1000));
           plotDiv.innerHTML = `
-            <div class="plot-icon">🌱</div>
+            <div class="plot-icon">${activeCrop.icon}</div>
             <div class="plot-text">Growing (${timeLeft}s)</div>
           `;
         } else if (plot.state === 'ready') {
           plotDiv.innerHTML = `
-            <div class="plot-icon">🌾</div>
-            <div class="plot-text" style="color: #45bd62; font-weight: bold;">Harvest! (+20 🪙)</div>
+            <div class="plot-icon">${activeCrop.icon}</div>
+            <div class="plot-text" style="color: #2ecc71; font-weight: bold;">Harvest! (+${activeCrop.reward}🪙)</div>
           `;
         }
 
         gridContainer.appendChild(plotDiv);
       });
 
-      document.getElementById('coin-count').innerText = coins;
+      renderHeaderInfo();
     }
 
     function handlePlotClick(index) {
       const plot = plots[index];
+      const activeCrop = getCurrentCrop();
 
       if (plot.state === 'empty') {
-        if (coins < 10) {
+        if (coins < activeCrop.cost) {
           alert("Not enough coins to buy seeds!");
           return;
         }
-        coins -= 10; // Deduct seed cost
+        coins -= activeCrop.cost;
         plot.state = 'growing';
         plot.plantedAt = Date.now();
         renderGrid();
 
-        // Check growth completion after GROW_TIME_SECONDS
-        setTimeout(() => {
-          if (plot.state === 'growing') {
-            plot.state = 'ready';
-            renderGrid();
-          }
-        }, GROW_TIME_SECONDS * 1000);
-
       } else if (plot.state === 'ready') {
-        coins += 20; // Harvest reward
+        coins += activeCrop.reward;
+        xp += activeCrop.xpGain;
+
+        // Level Up check
+        if (xp >= xpTarget) {
+          level++;
+          xp = 0;
+          xpTarget += 100;
+          alert(`🎉 Congratulations! You reached Level ${level}! New plants unlocked.`);
+        }
+
         plot.state = 'empty';
         plot.plantedAt = null;
         renderGrid();
       }
     }
 
-    // Refresh timers every second to update UI countdowns
+    // Timer loop
     setInterval(() => {
       let needsRedraw = false;
+      const activeCrop = getCurrentCrop();
+
       plots.forEach(plot => {
         if (plot.state === 'growing') {
           const elapsed = Math.floor((Date.now() - plot.plantedAt) / 1000);
-          if (elapsed >= GROW_TIME_SECONDS) {
+          if (elapsed >= activeCrop.time) {
             plot.state = 'ready';
           }
           needsRedraw = true;
@@ -185,7 +250,6 @@
       if (needsRedraw) renderGrid();
     }, 1000);
 
-    // Initial render
     renderGrid();
   </script>
 </body>
