@@ -210,6 +210,7 @@
         <button class="panel-tab active" id="tab-plots" onclick="switchShopTab('plots')">Plots</button>
         <button class="panel-tab" id="tab-seeds" onclick="switchShopTab('seeds')">Seeds</button>
         <button class="panel-tab" id="tab-cash" onclick="switchShopTab('cash')">Coins (₱)</button>
+        <button class="panel-tab" id="tab-faq" onclick="switchShopTab('faq')">❓ FAQ</button>
       </div>
       <div id="shop-content"></div>
     </div>
@@ -254,28 +255,39 @@
     function xpNeededFor(lvl) { return Math.floor(150 * Math.pow(lvl, 1.55)); }
 
     const ranks = [
-      { min: 1, title: 'Baguhang Magsasaka' },
-      { min: 10, title: 'Masipag na Taga-Bukid' },
-      { min: 20, title: 'Punong Anihan' },
-      { min: 35, title: 'Ginintuang Magsasaka' },
-      { min: 50, title: 'Haring Palayan' },
-      { min: 65, title: 'Bantay ng Bukirin' },
-      { min: 80, title: 'Alamat ng Bukid' },
-      { min: 95, title: 'Datu ng Bukid Legends' }
+      { min: 1,  title: 'Baguhang Magsasaka' },   // Novice Farmer
+      { min: 10, title: 'Masipag na Taga-Bukid' }, // Diligent Farmhand
+      { min: 20, title: 'Punong Anihan' },         // Chief Harvester
+      { min: 30, title: 'Ginintuang Magsasaka' },  // Golden Farmer
+      { min: 40, title: 'Bantay ng Bukirin' },     // Guardian of the Farmlands
+      { min: 50, title: 'Pinuno ng Palayan' },     // Leader of the Rice Fields
+      { min: 60, title: 'Alamat ng Bukid' },       // Legend of the Farm
+      { min: 70, title: 'Diwata ng Ani' },         // Harvest Spirit/Deity
+      { min: 80, title: 'Prinsipe ng Palayan' },   // Prince of the Rice Fields
+      { min: 90, title: 'Bathala ng Bukirin' },    // God of the Farmlands
+      { min: 100, title: 'Hari ng Magsasaka' }     // King of Farmers
     ];
     function rankFor(lvl) { let c = ranks[0].title; for (const r of ranks) if (lvl >= r.min) c = r.title; return c; }
 
+    // 16 tiers spread evenly across the full 1-100 range so there's always
+    // something new to unlock (old version had big dead gaps near the top).
     const crops = {
-      1:  { name: 'Palay',           icon: '🌾', cost: 12,   reward: 22,    time: 25,   xpGain: 12,  unlockLvl: 1 },
-      2:  { name: 'Kamatis',         icon: '🍅', cost: 35,   reward: 68,    time: 90,   xpGain: 32,  unlockLvl: 6 },
-      3:  { name: 'Mais',            icon: '🌽', cost: 80,   reward: 165,   time: 240,  xpGain: 70,  unlockLvl: 14 },
-      4:  { name: 'Kamote',          icon: '🍠', cost: 160,  reward: 340,   time: 480,  xpGain: 140, unlockLvl: 24 },
-      5:  { name: 'Saging',          icon: '🍌', cost: 320,  reward: 700,   time: 900,  xpGain: 280, unlockLvl: 36 },
-      6:  { name: 'Pinya',           icon: '🍍', cost: 650,  reward: 1450,  time: 1500, xpGain: 550, unlockLvl: 50 },
-      7:  { name: 'Mangga',          icon: '🥭', cost: 1300, reward: 2950,  time: 2400, xpGain: 1100,unlockLvl: 65 },
-      8:  { name: 'Niyog',           icon: '🥥', cost: 2600, reward: 6000,  time: 3600, xpGain: 2200,unlockLvl: 80 },
-      9:  { name: 'Cacao',           icon: '🍫', cost: 5200, reward: 12200, time: 5400, xpGain: 4400,unlockLvl: 92 },
-      10: { name: 'Ginintuang Palay',icon: '✨', cost: 10000,reward: 24000, time: 7200, xpGain: 8800, unlockLvl: 100 }
+      1:  { name: 'Palay',            icon: '🌾', cost: 10,     reward: 18,     time: 20,    xpGain: 10,    unlockLvl: 1 },
+      2:  { name: 'Munggo',           icon: '🫘', cost: 22,     reward: 40,     time: 45,    xpGain: 20,    unlockLvl: 5 },
+      3:  { name: 'Kamatis',          icon: '🍅', cost: 45,     reward: 85,     time: 100,   xpGain: 40,    unlockLvl: 10 },
+      4:  { name: 'Talong',           icon: '🍆', cost: 80,     reward: 155,    time: 180,   xpGain: 70,    unlockLvl: 16 },
+      5:  { name: 'Mais',             icon: '🌽', cost: 150,    reward: 300,    time: 320,   xpGain: 130,   unlockLvl: 23 },
+      6:  { name: 'Kamote',           icon: '🍠', cost: 280,    reward: 560,    time: 520,   xpGain: 240,   unlockLvl: 30 },
+      7:  { name: 'Sibuyas',          icon: '🧅', cost: 520,    reward: 1050,   time: 820,   xpGain: 450,   unlockLvl: 38 },
+      8:  { name: 'Saging',           icon: '🍌', cost: 950,    reward: 1950,   time: 1250,  xpGain: 820,   unlockLvl: 46 },
+      9:  { name: 'Papaya',           icon: '🍈', cost: 1750,   reward: 3600,   time: 1850,  xpGain: 1500,  unlockLvl: 56 },
+      10: { name: 'Pinya',            icon: '🍍', cost: 3200,   reward: 6600,   time: 2650,  xpGain: 2700,  unlockLvl: 64 },
+      11: { name: 'Kalabasa',         icon: '🎃', cost: 5800,   reward: 12000,  time: 3700,  xpGain: 4800,  unlockLvl: 72 },
+      12: { name: 'Mangga',           icon: '🥭', cost: 10500,  reward: 22000,  time: 5000,  xpGain: 8600,  unlockLvl: 80 },
+      13: { name: 'Niyog',            icon: '🥥', cost: 19000,  reward: 40000,  time: 6600,  xpGain: 15500, unlockLvl: 86 },
+      14: { name: 'Kape',             icon: '☕', cost: 34000,  reward: 72000,  time: 8500,  xpGain: 28000, unlockLvl: 92 },
+      15: { name: 'Cacao',            icon: '🍫', cost: 62000,  reward: 130000, time: 10500, xpGain: 50000, unlockLvl: 96 },
+      16: { name: 'Ginintuang Palay', icon: '✨', cost: 110000, reward: 235000, time: 13000, xpGain: 90000, unlockLvl: 100 }
     };
 
     function unlockedCrops() {
@@ -501,7 +513,7 @@
     let shopTab = 'plots';
     function switchShopTab(tab) {
       shopTab = tab;
-      ['plots','seeds','cash'].forEach(t => document.getElementById(`tab-${t}`).classList.toggle('active', t === tab));
+      ['plots','seeds','cash','faq'].forEach(t => document.getElementById(`tab-${t}`).classList.toggle('active', t === tab));
       renderShop();
     }
     function renderShop() {
@@ -556,6 +568,32 @@
             <div class="shop-row-left"><div class="shop-icon">💰</div><div><div class="shop-name">6,000 Coins</div><div class="shop-sub">≈ 250 ⭐ Stars</div></div></div>
             <button class="shop-btn cash" onclick="alert('Payments not wired up yet — needs Telegram Stars + backend verification.')">Buy</button>
           </div>
+        `;
+      }
+
+      if (shopTab === 'faq') {
+        let rows = '';
+        Object.entries(crops).forEach(([k, c]) => {
+          const unlocked = level >= c.unlockLvl;
+          rows += `
+            <div class="shop-row">
+              <div class="shop-row-left">
+                <div class="shop-icon">${c.icon}</div>
+                <div>
+                  <div class="shop-name">${c.name} ${unlocked ? '' : '🔒'}</div>
+                  <div class="shop-sub">Lvl ${c.unlockLvl} · ${c.cost}🪙 seed → ${c.reward}🪙 harvest · ${Math.round(c.time/60)}m grow</div>
+                </div>
+              </div>
+            </div>`;
+        });
+        el.innerHTML = `
+          <div class="locked-feature" style="margin-bottom:10px;">
+            <b>How tiers work:</b> every crop is a "tier." Higher tiers unlock automatically as you level up (no purchase needed to unlock — just reach the level). Cost, harvest reward, and grow time all scale up with each tier, and harvesting higher-tier crops gives much more XP, which is what makes late-game leveling worth it.<br><br>
+            <b>Plots</b> are separate from crop tiers — they're extra farm slots you buy with coins once you hit their level requirement (see Shop → Plots tab).<br><br>
+            <b>Ranks</b> (shown under your name at the top) are cosmetic titles tied to level, not tiers — purely bragging rights.
+          </div>
+          <div style="font-size:11px; font-weight:800; text-align:left; margin-bottom:6px; color:var(--accent-gold);">ALL 16 CROP TIERS</div>
+          ${rows}
         `;
       }
     }
