@@ -1,1 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telegram Farm Game</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      text-align: center;
+      background: #18191a;
+      color: #e4e6eb;
+      margin: 0;
+      padding: 20px;
+    }
+    .header {
+      background: #242526;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
+    .stats {
+      font-size: 18px;
+      font-weight: bold;
+      color: #45bd62;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      max-width: 350px;
+      margin: 0 auto;
+    }
+    .plot {
+      background: #3a3b3c;
+      border: 2px dashed #4e4f50;
+      border-radius: 12px;
+      height: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .plot:active {
+      transform: scale(0.95);
+    }
+    .plot.growing {
+      border: 2px solid #f0ad4e;
+      background: #2c2d2e;
+    }
+    .plot.ready {
+      border: 2px solid #45bd62;
+      background: #1b3a2b;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+    .plot-icon {
+      font-size: 36px;
+      margin-bottom: 5px;
+    }
+    .plot-text {
+      font-size: 13px;
+      color: #b0b3b8;
+    }
+  </style>
+</head>
+<body>
 
+  <div class="header">
+    <h2 id="welcome-msg">🌱 Telegram Farm</h2>
+    <div class="stats">Coins: <span id="coin-count">100</span> 🪙</div>
+  </div>
+
+  <p style="font-size: 14px; color: #b0b3b8; margin-bottom: 20px;">Tap an empty plot to plant wheat (Cost: 10 🪙)</p>
+
+  <div class="grid" id="farm-grid">
+    <!-- Plots generated dynamically via JavaScript -->
+  </div>
+
+  <script>
+    // Initialize Telegram WebApp SDK
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    // Personalize Greeting if opened inside Telegram
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      document.getElementById('welcome-msg').innerText = `🌱 ${tg.initDataUnsafe.user.first_name}'s Farm`;
+    }
+
+    // Game State
+    let coins = 100;
+    const GROW_TIME_SECONDS = 5; // 5 seconds growth cycle for testing
+    
+    // 4 Farm Plots Data
+    let plots = [
+      { id: 0, state: 'empty', plantedAt: null, timer: null },
+      { id: 1, state: 'empty', plantedAt: null, timer: null },
+      { id: 2, state: 'empty', plantedAt: null, timer: null },
+      { id: 3, state: 'empty', plantedAt: null, timer: null }
+    ];
+
+    function renderGrid() {
+      const gridContainer = document.getElementById('farm-grid');
+      gridContainer.innerHTML = '';
+
+      plots.forEach((plot, index) => {
+        const plotDiv = document.createElement('div');
+        plotDiv.className = `plot ${plot.state}`;
+        plotDiv.onclick = () => handlePlotClick(index);
+
+        if (plot.state === 'empty') {
+          plotDiv.innerHTML = `
+            <div class="plot-icon">🟫</div>
+            <div class="plot-text">Tap to Plant</div>
+          `;
+        } else if (plot.state === 'growing') {
+          const timeLeft = Math.max(0, GROW_TIME_SECONDS - Math.floor((Date.now() - plot.plantedAt) / 1000));
+          plotDiv.innerHTML = `
+            <div class="plot-icon">🌱</div>
+            <div class="plot-text">Growing (${timeLeft}s)</div>
+          `;
+        } else if (plot.state === 'ready') {
+          plotDiv.innerHTML = `
+            <div class="plot-icon">🌾</div>
+            <div class="plot-text" style="color: #45bd62; font-weight: bold;">Harvest! (+20 🪙)</div>
+          `;
+        }
+
+        gridContainer.appendChild(plotDiv);
+      });
+
+      document.getElementById('coin-count').innerText = coins;
+    }
+
+    function handlePlotClick(index) {
+      const plot = plots[index];
+
+      if (plot.state === 'empty') {
+        if (coins < 10) {
+          alert("Not enough coins to buy seeds!");
+          return;
+        }
+        coins -= 10; // Deduct seed cost
+        plot.state = 'growing';
+        plot.plantedAt = Date.now();
+        renderGrid();
+
+        // Check growth completion after GROW_TIME_SECONDS
+        setTimeout(() => {
+          if (plot.state === 'growing') {
+            plot.state = 'ready';
+            renderGrid();
+          }
+        }, GROW_TIME_SECONDS * 1000);
+
+      } else if (plot.state === 'ready') {
+        coins += 20; // Harvest reward
+        plot.state = 'empty';
+        plot.plantedAt = null;
+        renderGrid();
+      }
+    }
+
+    // Refresh timers every second to update UI countdowns
+    setInterval(() => {
+      let needsRedraw = false;
+      plots.forEach(plot => {
+        if (plot.state === 'growing') {
+          const elapsed = Math.floor((Date.now() - plot.plantedAt) / 1000);
+          if (elapsed >= GROW_TIME_SECONDS) {
+            plot.state = 'ready';
+          }
+          needsRedraw = true;
+        }
+      });
+      if (needsRedraw) renderGrid();
+    }, 1000);
+
+    // Initial render
+    renderGrid();
+  </script>
+</body>
+</html>
