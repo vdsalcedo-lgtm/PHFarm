@@ -3,21 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PH Farm - Telegram Mini App</title>
+  <title>Bukid Legends - Telegram Mini App</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg-gradient: linear-gradient(135deg, #134e5e, #71b280);
-      --card-bg: rgba(255, 255, 255, 0.1);
-      --card-border: rgba(255, 255, 255, 0.2);
-      --accent-green: #2ecc71;
-      --accent-gold: #f1c40f;
+      --bg-gradient: linear-gradient(160deg, #1b3a2b 0%, #2f5233 40%, #4a7c3f 100%);
+      --card-bg: rgba(20, 40, 25, 0.55);
+      --card-border: rgba(255, 215, 130, 0.25);
+      --accent-gold: #f0b429;
+      --accent-terracotta: #c1622d;
+      --accent-green: #6fbf73;
+      --text-cream: #fdf6e3;
     }
+    * { box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       text-align: center;
       background: var(--bg-gradient);
-      color: #ffffff;
+      color: var(--text-cream);
       margin: 0;
       padding: 10px;
       min-height: 100vh;
@@ -29,32 +32,65 @@
       padding: 12px;
       border-radius: 14px;
       margin-bottom: 10px;
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
+    }
+    .title-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+    .title-row h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0.3px;
+    }
+    .rank-label {
+      font-size: 11px;
+      color: var(--accent-gold);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .xp-bar-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(0,0,0,0.35);
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 6px 0 8px 0;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .xp-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-gold), var(--accent-terracotta));
+      border-radius: 6px;
+      transition: width 0.3s ease;
     }
     .stats-row {
       display: flex;
       justify-content: space-around;
-      margin-top: 8px;
       font-size: 13px;
       font-weight: bold;
     }
     .stat-badge {
-      background: rgba(0, 0, 0, 0.25);
-      padding: 4px 8px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 4px 9px;
       border-radius: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.12);
     }
     .unlocked-banner {
-      background: rgba(241, 196, 15, 0.2);
+      background: rgba(240, 180, 41, 0.15);
       border: 1px solid var(--accent-gold);
-      color: #f39c12;
-      padding: 6px;
+      color: var(--accent-gold);
+      padding: 7px;
       border-radius: 8px;
       font-size: 12px;
       margin-bottom: 10px;
       font-weight: bold;
     }
-    /* 4x5 Farm Grid Layout */
     .grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -63,7 +99,7 @@
       margin: 0 auto;
     }
     .plot {
-      background: rgba(44, 62, 80, 0.7);
+      background: rgba(30, 45, 20, 0.75);
       backdrop-filter: blur(4px);
       border: 1.5px dashed rgba(255, 255, 255, 0.3);
       border-radius: 10px;
@@ -75,31 +111,26 @@
       cursor: pointer;
       transition: all 0.2s ease;
     }
-    .plot:active {
-      transform: scale(0.95);
-    }
+    .plot:active { transform: scale(0.95); }
     .plot.locked {
       background: rgba(0, 0, 0, 0.4);
       border: 1.5px dashed rgba(255, 255, 255, 0.1);
       cursor: not-allowed;
     }
     .plot.growing {
-      border: 2px solid #e67e22;
-      background: rgba(230, 126, 34, 0.2);
+      border: 2px solid var(--accent-terracotta);
+      background: rgba(193, 98, 45, 0.2);
     }
     .plot.ready {
       border: 2px solid var(--accent-green);
-      background: rgba(46, 204, 113, 0.3);
+      background: rgba(111, 191, 115, 0.3);
       animation: pulse 1.2s infinite alternate;
     }
     @keyframes pulse {
       0% { transform: scale(1); }
       100% { transform: scale(1.03); }
     }
-    .plot-icon {
-      font-size: 26px;
-      margin-bottom: 2px;
-    }
+    .plot-icon { font-size: 26px; margin-bottom: 2px; }
     .plot-text {
       font-size: 10px;
       color: #ecf0f1;
@@ -107,26 +138,37 @@
       text-align: center;
       padding: 0 2px;
     }
+    .footer-note {
+      margin-top: 10px;
+      font-size: 10px;
+      color: rgba(253, 246, 227, 0.55);
+    }
   </style>
 </head>
 <body>
 
   <div class="header">
-    <h2 id="welcome-msg" style="margin: 0 0 6px 0; font-size: 18px;">🌱 PH Farm</h2>
+    <div class="title-row">
+      <h2 id="welcome-msg">🌾 Bukid Legends</h2>
+    </div>
+    <div class="rank-label" id="rank-label">Baguhang Magsasaka</div>
+    <div class="xp-bar-track">
+      <div class="xp-bar-fill" id="xp-bar-fill" style="width:0%"></div>
+    </div>
     <div class="stats-row">
       <div class="stat-badge">🪙 <span id="coin-count">100</span></div>
-      <div class="stat-badge">⭐ Lvl <span id="level-num">1</span></div>
-      <div class="stat-badge">📈 <span id="xp-count">0</span>/<span id="xp-target">200</span></div>
+      <div class="stat-badge">⭐ Lvl <span id="level-num">1</span>/100</div>
+      <div class="stat-badge">📈 <span id="xp-count">0</span>/<span id="xp-target">150</span></div>
     </div>
   </div>
 
   <div id="unlock-info" class="unlocked-banner">
-    🔓 Active Seed: <b>Wheat</b>
+    🔓 Active Seed: <b>Palay</b>
   </div>
 
-  <div class="grid" id="farm-grid">
-    <!-- 20 Plots generated dynamically -->
-  </div>
+  <div class="grid" id="farm-grid"></div>
+
+  <div class="footer-note">Bukid Legends · isang taniman, walang hanggang ani</div>
 
   <script>
     const tg = window.Telegram.WebApp;
@@ -134,40 +176,80 @@
     tg.expand();
 
     if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-      document.getElementById('welcome-msg').innerText = `🌱 ${tg.initDataUnsafe.user.first_name}'s Farm`;
+      document.getElementById('welcome-msg').innerText = `🌾 ${tg.initDataUnsafe.user.first_name}'s Bukid`;
     }
 
     let coins = 100;
     let level = 1;
     let xp = 0;
-    let xpTarget = 200;
 
+    // Level 1-100 curve: each level demands more XP than the last (power curve).
+    // Keeps early levels quick, late levels a real grind for competitive players.
+    function xpNeededFor(lvl) {
+      return Math.floor(150 * Math.pow(lvl, 1.55));
+    }
+
+    // Farmer rank titles, shown as a badge of status as players climb.
+    const ranks = [
+      { min: 1, title: 'Baguhang Magsasaka' },      // Novice Farmer
+      { min: 10, title: 'Masipag na Taga-Bukid' },   // Diligent Farmhand
+      { min: 20, title: 'Punong Anihan' },           // Chief Harvester
+      { min: 35, title: 'Ginintuang Magsasaka' },    // Golden Farmer
+      { min: 50, title: 'Haring Palayan' },          // King of the Rice Fields
+      { min: 65, title: 'Bantay ng Bukirin' },        // Guardian of the Farmlands
+      { min: 80, title: 'Alamat ng Bukid' },          // Legend of the Farm
+      { min: 95, title: 'Datu ng Bukid Legends' }     // Chieftain
+    ];
+    function rankFor(lvl) {
+      let current = ranks[0].title;
+      for (const r of ranks) if (lvl >= r.min) current = r.title;
+      return current;
+    }
+
+    // Filipino crop lineup - unlocks progressively with level, each tier a step up
+    // in cost/reward/time so the "active seed" always feels like real progression.
     const crops = {
-      1: { name: 'Wheat', icon: '🌾', cost: 15, reward: 28, time: 30, xpGain: 15 },
-      2: { name: 'Tomato', icon: '🍅', cost: 40, reward: 80, time: 120, xpGain: 45 },
-      3: { name: 'Golden Corn', icon: '🌽', cost: 90, reward: 190, time: 300, xpGain: 100 }
+      1:  { name: 'Palay',          icon: '🌾', cost: 12,   reward: 22,    time: 25,   xpGain: 12,  unlockLvl: 1 },
+      2:  { name: 'Kamatis',        icon: '🍅', cost: 35,   reward: 68,    time: 90,   xpGain: 32,  unlockLvl: 6 },
+      3:  { name: 'Mais',           icon: '🌽', cost: 80,   reward: 165,   time: 240,  xpGain: 70,  unlockLvl: 14 },
+      4:  { name: 'Kamote',         icon: '🍠', cost: 160,  reward: 340,   time: 480,  xpGain: 140, unlockLvl: 24 },
+      5:  { name: 'Saging',         icon: '🍌', cost: 320,  reward: 700,   time: 900,  xpGain: 280, unlockLvl: 36 },
+      6:  { name: 'Pinya',          icon: '🍍', cost: 650,  reward: 1450,  time: 1500, xpGain: 550, unlockLvl: 50 },
+      7:  { name: 'Mangga',         icon: '🥭', cost: 1300, reward: 2950,  time: 2400, xpGain: 1100,unlockLvl: 65 },
+      8:  { name: 'Niyog',          icon: '🥥', cost: 2600, reward: 6000,  time: 3600, xpGain: 2200,unlockLvl: 80 },
+      9:  { name: 'Cacao',          icon: '🍫', cost: 5200, reward: 12200, time: 5400, xpGain: 4400,unlockLvl: 92 },
+      10: { name: 'Ginintuang Palay', icon: '✨', cost: 10000,reward: 24000, time: 7200, xpGain: 8800, unlockLvl: 100 }
     };
 
-    // 20 Plots (4x5 grid). Each plot specifies what level unlocks it.
+    function getCurrentCrop() {
+      let best = crops[1];
+      for (const key in crops) {
+        const c = crops[key];
+        if (level >= c.unlockLvl) best = c;
+      }
+      return best;
+    }
+
+    // 20 plots (4x5). Unlock levels spread across the full 1-100 range,
+    // so the grid keeps expanding meaningfully the whole way through.
+    const rowUnlockLevels = [1, 10, 25, 45, 70];
     let plots = Array.from({ length: 20 }, (_, index) => ({
       id: index,
-      state: 'empty', // 'locked', 'empty', 'growing', 'ready'
+      state: 'empty',
       plantedAt: null,
-      requiredLevel: Math.floor(index / 4) + 1 // Row 1: Lvl 1, Row 2: Lvl 2, etc.
+      requiredLevel: rowUnlockLevels[Math.floor(index / 4)]
     }));
 
     function loadGame() {
       if (tg.CloudStorage) {
-        tg.CloudStorage.getItem('ph_farm_save_v2', (err, value) => {
+        tg.CloudStorage.getItem('bukid_legends_save_v1', (err, value) => {
           if (!err && value) {
             try {
               const data = JSON.parse(value);
               coins = data.coins ?? 100;
               level = data.level ?? 1;
               xp = data.xp ?? 0;
-              xpTarget = data.xpTarget ?? 200;
               if (data.plots) plots = data.plots;
-              renderGrid();
             } catch (e) {}
           }
           renderGrid();
@@ -179,34 +261,28 @@
 
     function saveGame() {
       if (tg.CloudStorage) {
-        tg.CloudStorage.setItem('ph_farm_save_v2', JSON.stringify({ coins, level, xp, xpTarget, plots }));
+        tg.CloudStorage.setItem('bukid_legends_save_v1', JSON.stringify({ coins, level, xp, plots }));
       }
-    }
-
-    function getCurrentCrop() {
-      if (level >= 3) return crops[3];
-      if (level === 2) return crops[2];
-      return crops[1];
     }
 
     function renderGrid() {
       const gridContainer = document.getElementById('farm-grid');
       gridContainer.innerHTML = '';
       const activeCrop = getCurrentCrop();
+      const xpTarget = xpNeededFor(level);
 
       document.getElementById('coin-count').innerText = coins;
       document.getElementById('level-num').innerText = level;
       document.getElementById('xp-count').innerText = xp;
       document.getElementById('xp-target').innerText = xpTarget;
-      document.getElementById('unlock-infoinnerHTML') = '';
+      document.getElementById('rank-label').innerText = rankFor(level);
+      document.getElementById('xp-bar-fill').style.width = level >= 100 ? '100%' : `${Math.min(100, (xp / xpTarget) * 100)}%`;
       document.getElementById('unlock-info').innerHTML = `🔓 Active Seed: <b>${activeCrop.name} ${activeCrop.icon}</b>`;
 
       plots.forEach((plot, index) => {
         const plotDiv = document.createElement('div');
-        
-        // Determine plot lock status based on user level
         const isLocked = level < plot.requiredLevel;
-        
+
         if (isLocked) {
           plotDiv.className = 'plot locked';
           plotDiv.innerHTML = `
@@ -217,8 +293,7 @@
           plotDiv.className = `plot ${plot.state}`;
           plotDiv.onclick = () => handlePlotClick(index);
 
-          if (plot.state === 'empty' || plot.state === 'locked') {
-            plot.state = 'empty'; // unlock state if level met
+          if (plot.state === 'empty') {
             plotDiv.innerHTML = `
               <div class="plot-icon">🟫</div>
               <div class="plot-text">Plant (${activeCrop.cost}🪙)</div>
@@ -228,7 +303,6 @@
             const mins = Math.floor(timeLeft / 60);
             const secs = timeLeft % 60;
             const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-
             plotDiv.innerHTML = `
               <div class="plot-icon">${activeCrop.icon}</div>
               <div class="plot-text">${timeStr}</div>
@@ -236,7 +310,7 @@
           } else if (plot.state === 'ready') {
             plotDiv.innerHTML = `
               <div class="plot-icon">${activeCrop.icon}</div>
-              <div class="plot-text" style="color: #2ecc71; font-weight: bold;">Harvest!</div>
+              <div class="plot-text" style="color: var(--accent-green); font-weight: bold;">Anihin!</div>
             `;
           }
         }
@@ -252,7 +326,7 @@
 
       if (plot.state === 'empty') {
         if (coins < activeCrop.cost) {
-          alert("Not enough coins!");
+          alert("Kulang ang pera mo! (Not enough coins)");
           return;
         }
         coins -= activeCrop.cost;
@@ -264,11 +338,15 @@
         coins += activeCrop.reward;
         xp += activeCrop.xpGain;
 
-        if (xp >= xpTarget) {
+        // Level up loop - handles multiple level-ups from one big harvest at high levels
+        while (level < 100 && xp >= xpNeededFor(level)) {
+          xp -= xpNeededFor(level);
           level++;
-          xp = 0;
-          xpTarget += 250;
-          alert(`🎉 Level Up! You reached Level ${level}! New plots and crops unlocked.`);
+          alert(`🎉 Level Up! Ngayon ay Level ${level} ka na! (${rankFor(level)})`);
+        }
+        if (level >= 100) {
+          level = 100;
+          xp = xpNeededFor(100);
         }
 
         plot.state = 'empty';
@@ -287,10 +365,8 @@
           if (elapsed >= activeCrop.time) {
             plot.state = 'ready';
             saveGame();
-            needsRedraw = true;
-          } else {
-            needsRedraw = true;
           }
+          needsRedraw = true;
         }
       });
       if (needsRedraw) renderGrid();
